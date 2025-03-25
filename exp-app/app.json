@@ -4,11 +4,9 @@
     "slug": "ukulele-controller",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/iot_ukelele.jpeg",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -16,7 +14,6 @@
       "package": "com.iotukelele.controller",
       "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/iot_ukelele.jpeg",
         "backgroundColor": "#ffffff"
       },
       "permissions": []
