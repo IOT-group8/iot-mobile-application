@@ -1,40 +1,42 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Switch, Text } from 'react-native';
-import { firebaseConfig } from './config/firebase.js';
+import { firebaseConfig } from './config/firebase.js'; // Update this line
+
 
 export default function App() {
   const { baseURL, apiKey } = firebaseConfig;
 
-  // State with numeric keys for frets and strumming
-  const [states, setStates] = useState({
-    0: false, // Fret 1
-    1: false, // Fret 2
-    2: false, // Fret 3
-    3: false, // Fret 4
-    4: false  // Strumming
+  // State for switches
+  const [fretStates, setFretStates] = useState({
+    fret_1: false,
+    fret_2: false,
+    fret_3: false,
+    fret_4: false
   });
+  const [isStrumming, setIsStrumming] = useState(false);
 
   const handleFretChange = async (fretNumber, value) => {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      // Update local state with 0-based index
-      setStates(prev => ({
+      // Update local state
+      setFretStates(prev => ({
         ...prev,
-        [fretNumber - 1]: value
+        [`fret_${fretNumber}`]: value
       }));
 
-      // Send entire state to Firebase /frets endpoint
-      const response = await fetch(`${baseURL}/frets.json?key=${apiKey}`, {
-        method: 'PUT',
+      // Send data to Firebase
+      const data = {
+        [`fret_${fretNumber}`]: value
+      };
+
+      const response = await fetch(`${baseURL}/ukulele_state.json?key=${apiKey}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...states,
-          [fretNumber - 1]: value
-        }),
+        body: JSON.stringify(data),
         signal: controller.signal
       });
 
@@ -55,22 +57,20 @@ export default function App() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      // Update local state for strumming (index 4)
-      setStates(prev => ({
-        ...prev,
-        4: value
-      }));
+      // Update local state
+      setIsStrumming(value);
 
-      // Send entire state to Firebase /frets endpoint
-      const response = await fetch(`${baseURL}/frets.json?key=${apiKey}`, {
-        method: 'PUT',
+      // Send data to Firebase
+      const data = {
+        is_strumming: value
+      };
+
+      const response = await fetch(`${baseURL}/ukulele_state.json?key=${apiKey}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...states,
-          4: value
-        }),
+        body: JSON.stringify(data),
         signal: controller.signal
       });
 
@@ -99,10 +99,10 @@ export default function App() {
               <Text style={styles.fretLabel}>Fret {fretNumber}</Text>
               <Switch
                 trackColor={{ false: "#767577", true: "#4CAF50" }}
-                thumbColor={states[fretNumber - 1] ? "#fff" : "#f4f3f4"}
+                thumbColor={fretStates[`fret_${fretNumber}`] ? "#fff" : "#f4f3f4"}
                 ios_backgroundColor="#3e3e3e"
                 onValueChange={(value) => handleFretChange(fretNumber, value)}
-                value={states[fretNumber - 1]}
+                value={fretStates[`fret_${fretNumber}`]}
                 style={styles.switch}
               />
             </View>
@@ -113,10 +113,10 @@ export default function App() {
           <Text style={styles.strumLabel}>Strum Control</Text>
           <Switch
             trackColor={{ false: "#767577", true: "#2196F3" }}
-            thumbColor={states[4] ? "#fff" : "#f4f3f4"}
+            thumbColor={isStrumming ? "#fff" : "#f4f3f4"}
             ios_backgroundColor="#3e3e3e"
             onValueChange={handleStrumChange}
-            value={states[4]}
+            value={isStrumming}
             style={styles.switch}
           />
         </View>
